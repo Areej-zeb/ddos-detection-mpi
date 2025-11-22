@@ -385,16 +385,6 @@ Contributions are welcome! Please follow these steps:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👥 Authors
-
-- **Student ID: i221591**
-- **Student ID: i221657**
-- **Student ID: i221561**
-
-**Course**: Parallel and Distributed Computing (PDC)  
-**Institution**: FAST-NUCES  
-**Year**: 2024-2025
-
 ## 🙏 Acknowledgments
 
 - **CIC-DDoS2019 Dataset**: Canadian Institute for Cybersecurity
@@ -414,3 +404,4 @@ For questions or support, please open an issue on GitHub or contact the authors 
 ---
 
 **⭐ Star this repository if you find it helpful!**
+
