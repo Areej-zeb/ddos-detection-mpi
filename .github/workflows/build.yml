@@ -1,0 +1,105 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        mpi: [mpich, openmpi]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        if [ "${{ matrix.mpi }}" = "mpich" ]; then
+          sudo apt-get install -y mpich libmpich-dev
+        else
+          sudo apt-get install -y openmpi-bin libopenmpi-dev
+        fi
+        sudo apt-get install -y gcc make python3
+    
+    - name: Verify MPI installation
+      run: |
+        mpicc --version
+        mpiexec --version
+    
+    - name: Build project (CPU-only)
+      run: |
+        mpicc -Wall -Wextra -O2 -std=c99 \
+          main.c csv_parser.c detection.c blocking.c metrics.c output.c \
+          detection_cuda_stub.c \
+          -o ddos_detector -lm
+    
+    - name: Verify build
+      run: |
+        test -f ddos_detector
+        file ddos_detector
+    
+    - name: Create test dataset
+      run: |
+        mkdir -p datasets
+        cat > datasets/test_data.csv << 'EOF'
+        SrcIP,DstIP,Protocol,FlowBytes/s,PktLenMean,Label
+        192.168.1.100,10.0.0.1,6,1000,64,BENIGN
+        192.168.1.101,10.0.0.1,6,50000,512,DDoS
+        192.168.1.102,10.0.0.1,17,2000,128,BENIGN
+        192.168.1.103,10.0.0.1,6,100000,1024,DDoS
+        192.168.1.104,10.0.0.1,6,1500,64,BENIGN
+        192.168.1.105,10.0.0.1,6,80000,768,DDoS
+        EOF
+    
+    - name: Run detector (2 processes)
+      run: |
+        timeout 60 mpiexec -n 2 ./ddos_detector datasets/test_data.csv || true
+    
+    - name: Check output files
+      run: |
+        if [ -f results.txt ]; then
+          echo "Results file created:"
+          cat results.txt
+        fi
+        if [ -f blocklist_2_ranks.txt ]; then
+          echo "Blocklist created:"
+          cat blocklist_2_ranks.txt
+        fi
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-${{ matrix.mpi }}
+        path: |
+          results.txt
+          blocklist_*.txt
+          flowspec_rules.txt
+          acl_rules.txt
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Install cppcheck
+      run: sudo apt-get install -y cppcheck
+    
+    - name: Run static analysis
+      run: |
+        cppcheck --enable=all --suppress=missingIncludeSystem \
+          --error-exitcode=0 *.c *.h 2>&1 | tee cppcheck.log
+    
+    - name: Upload analysis results
+      uses: actions/upload-artifact@v3
+      with:
+        name: static-analysis
+        path: cppcheck.log

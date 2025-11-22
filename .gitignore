@@ -1,0 +1,87 @@
+# Compiled executables
+ddos_detector
+ddos_detector_cuda
+*.exe
+*.out
+
+# Object files
+*.o
+*.obj
+*.ko
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Debugging
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Build directories
+build/
+bin/
+obj/
+
+# Dataset files (large)
+datasets/
+*.csv
+!datasets/.gitkeep
+
+# Results and outputs
+results.txt
+blocklist_*.txt
+flowspec_rules.txt
+acl_rules.txt
+scalability_results/
+*.log
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+venv/
+env/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Documentation builds
+*.pdf
+*.docx
+!PDC_Project_i221591_i221657_i221561.docx
+
+# Core dumps
+core
+core.*
+
+# MPI/System specific
+*.hostfile
+*.machinefile
